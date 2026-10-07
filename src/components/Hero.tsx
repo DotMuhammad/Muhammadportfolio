@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Mail, Download, Github, ArrowRight, ChevronDown, Sparkles } from 'lucide-react';
+import { Mail, Download, Github, ArrowRight, ChevronDown, Sparkles } from 'lucide-react';
 import { PORTFOLIO_DATA } from '../data/portfolio';
 import { soundFx } from '../utils/sound';
 
@@ -9,14 +9,34 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
   const [currentSpecialtyIndex, setCurrentSpecialtyIndex] = useState(0);
+  const [displayedText, setDisplayedText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   const specialties = PORTFOLIO_DATA.personal.specialties;
 
+  // Typewriter effect matching the reference's dynamic heading
   useEffect(() => {
-    const timer = setInterval(() => {
+    const currentFullText = specialties[currentSpecialtyIndex];
+    let timeout: NodeJS.Timeout;
+
+    if (!isDeleting && displayedText !== currentFullText) {
+      timeout = setTimeout(() => {
+        setDisplayedText(currentFullText.slice(0, displayedText.length + 1));
+      }, 70);
+    } else if (!isDeleting && displayedText === currentFullText) {
+      timeout = setTimeout(() => {
+        setIsDeleting(true);
+      }, 2200);
+    } else if (isDeleting && displayedText !== '') {
+      timeout = setTimeout(() => {
+        setDisplayedText(currentFullText.slice(0, displayedText.length - 1));
+      }, 35);
+    } else if (isDeleting && displayedText === '') {
+      setIsDeleting(false);
       setCurrentSpecialtyIndex((prev) => (prev + 1) % specialties.length);
-    }, 2800);
-    return () => clearInterval(timer);
-  }, [specialties.length]);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [displayedText, isDeleting, currentSpecialtyIndex, specialties]);
 
   const scrollTo = (id: string) => {
     soundFx.playClick();
@@ -49,7 +69,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
                   </span>
                 </span>
                 <span className="block font-extrabold tracking-tight mt-1 leading-snug text-2xl sm:text-3xl lg:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-sky-400 to-indigo-400 min-h-[1.4em]">
-                  {specialties[currentSpecialtyIndex]}
+                  <span>{displayedText}</span>
+                  <span className="inline-block w-[3px] h-[0.9em] ml-1 bg-cyan-400 animate-pulse align-middle" />
                 </span>
               </h1>
 
@@ -72,6 +93,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
               <button
                 type="button"
                 onClick={() => scrollTo('projects')}
+                onMouseEnter={() => soundFx.playHover()}
                 className="min-h-[44px] px-7 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm shadow-md shadow-cyan-500/20 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] hover:shadow-cyan-500/35"
               >
                 <span>View My Work</span>
@@ -82,6 +104,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
               <button
                 type="button"
                 onClick={() => scrollTo('contact')}
+                onMouseEnter={() => soundFx.playHover()}
                 className="min-h-[44px] px-6 py-3.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300/90 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] hover:border-cyan-500/40"
               >
                 <Mail className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
@@ -96,6 +119,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
                     soundFx.playClick();
                     onOpenResume();
                   }}
+                  onMouseEnter={() => soundFx.playHover()}
                   className="flex-1 sm:flex-none min-h-[44px] px-5 py-3.5 rounded-xl bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm font-mono transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] hover:border-cyan-500/40 shadow-xs"
                 >
                   <Download className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
@@ -107,6 +131,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => soundFx.playClick()}
+                  onMouseEnter={() => soundFx.playHover()}
                   className="min-w-[44px] min-h-[44px] p-3.5 rounded-xl bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300/80 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0 hover:border-cyan-500/40 shadow-xs"
                   title="GitHub Profile"
                   aria-label="GitHub Profile"
@@ -138,7 +163,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
 
             {/* Mobile Portrait View */}
             <div className="flex md:hidden justify-center items-center pt-4 pb-2 my-2">
-              <PortraitCard className="w-[75vw] max-w-[320px]" />
+              <PortraitCard className="w-[75vw] max-w-[340px]" />
             </div>
           </div>
 
