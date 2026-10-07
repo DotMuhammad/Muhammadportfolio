@@ -16,12 +16,12 @@ export const AnimatedBackground: React.FC = () => {
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
-      {/* Deep Obsidian background base */}
-      <div className="absolute inset-0 bg-[#05070c]" />
+      {/* Deep Obsidian background base (dark: #090a0f, light: #f4f5f8) */}
+      <div className="absolute inset-0 dark:bg-[#090a0f] bg-[#f4f5f8] transition-colors duration-300" />
 
       {/* Grid pattern overlay with smooth radial mask */}
       <div 
-        className="absolute inset-0 bg-grid-pattern opacity-40 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_80%)]" 
+        className="absolute inset-0 bg-grid-pattern opacity-20 dark:opacity-40 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_80%)]" 
       />
 
       {/* Ambient gradient orbs */}

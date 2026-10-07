@@ -1,46 +1,61 @@
 import React, { useState } from 'react';
 import { ProjectCard } from './ProjectCard';
 import { PORTFOLIO_DATA, Project } from '../data/portfolio';
-import { X, ExternalLink, Github, CheckCircle2, ArrowRight } from 'lucide-react';
+import { soundFx } from '../utils/sound';
 
-export const Projects: React.FC = () => {
-  const [filter, setFilter] = useState<'All' | 'Full-Stack' | 'Frontend' | 'AI & Tools'>('All');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+interface ProjectsProps {
+  onOpenCaseStudy: (project: Project) => void;
+}
 
-  const projects = PORTFOLIO_DATA.projects;
-  const filteredProjects = filter === 'All'
-    ? projects
-    : projects.filter((p) => p.category === filter);
+export const Projects: React.FC<ProjectsProps> = ({ onOpenCaseStudy }) => {
+  const [filter, setFilter] = useState<string>('All');
+
+  const categories = ['All', 'Live Apps', 'Full-Stack', 'Frontend', 'AI & Tools'];
+
+  const allProjects = PORTFOLIO_DATA.projects;
+  const filteredProjects = allProjects.filter((p) => {
+    if (filter === 'All') return true;
+    if (filter === 'Live Apps') return Boolean(p.liveUrl);
+    if (filter === 'Full-Stack') return p.category === 'Full-Stack';
+    if (filter === 'Frontend') return p.category === 'Frontend';
+    if (filter === 'AI & Tools') return p.category === 'AI & Tools';
+    return true;
+  });
 
   return (
-    <section id="projects" className="py-24 px-4 sm:px-6 lg:px-8 relative z-10 border-t border-white/[0.05]">
-      <div className="max-w-6xl mx-auto">
+    <section id="projects" className="py-16 sm:py-24 relative overflow-hidden border-t dark:border-slate-800/80 border-slate-200/90">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cyan-400 mb-3">
-              <span className="w-6 h-px bg-cyan-400" />
-              <span>04 · Selected Works</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+          <div className="space-y-3 max-w-3xl">
+            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+              <span className="px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/30 font-bold">
+                PROJECTS // 02
+              </span>
+              <span className="text-slate-500 dark:text-slate-400">Engineering Showcase</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-              Featured Projects
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Featured Projects & Client Platforms
             </h2>
-            <p className="mt-4 text-lg text-slate-400 leading-relaxed">
-              Full-stack applications and frontend systems engineered with a focus on performance, clarity, and modern architectural standards.
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+              A curated collection of production web platforms, distributed cloud engines, and interactive developer utilities.
             </p>
           </div>
 
-          {/* Interactive Filter Segmented Control */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-900/60 border border-white/[0.07] rounded-xl self-start md:self-end">
-            {(['All', 'Full-Stack', 'Frontend', 'AI & Tools'] as const).map((cat) => (
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 self-start md:self-auto">
+            {categories.map((cat) => (
               <button
                 key={cat}
                 type="button"
-                onClick={() => setFilter(cat)}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                onClick={() => {
+                  soundFx.playClick();
+                  setFilter(cat);
+                }}
+                className={`min-h-[40px] px-3.5 py-2 rounded-full text-xs font-mono transition-all cursor-pointer ${
                   filter === cat
-                    ? 'bg-cyan-400 text-slate-950 shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
+                    : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
                 {cat}
@@ -50,118 +65,15 @@ export const Projects: React.FC = () => {
         </div>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {filteredProjects.map((project) => (
             <ProjectCard
               key={project.id}
               project={project}
-              onOpenDetails={(p) => setSelectedProject(p)}
+              onOpenCaseStudy={onOpenCaseStudy}
             />
           ))}
         </div>
-
-        {/* Modal for Deep Case Study / Architecture Inspection */}
-        {selectedProject && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-project-title"
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in"
-          >
-            <div className="relative w-full max-w-2xl rounded-2xl bg-[#090d18] border border-white/10 p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-              <button
-                type="button"
-                onClick={() => setSelectedProject(null)}
-                aria-label="Close dialog"
-                className="absolute top-5 right-5 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 mb-2">
-                <span>{selectedProject.category}</span>
-                <span>·</span>
-                <span>{selectedProject.metrics}</span>
-              </div>
-
-              <h3 id="modal-project-title" className="text-2xl sm:text-3xl font-extrabold text-white">
-                {selectedProject.title}
-              </h3>
-
-              <p className="mt-2 text-sm text-cyan-200/90 font-medium">
-                {selectedProject.tagline}
-              </p>
-
-              <p className="mt-4 text-sm text-slate-300 leading-relaxed">
-                {selectedProject.longDescription}
-              </p>
-
-              {/* Architectural Highlights */}
-              <div className="mt-6">
-                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-3">
-                  Key Technical Features & Architecture
-                </h4>
-                <ul className="space-y-2.5">
-                  {selectedProject.highlights.map((highlight, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-300">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>{highlight}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Technologies Stack */}
-              <div className="mt-6 pt-6 border-t border-white/[0.06]">
-                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-2">
-                  Technologies Deployed
-                </h4>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  {selectedProject.technologies.map((t) => (
-                    <span
-                      key={t}
-                      className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06] text-slate-300 font-mono text-[11px]"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Modal Action CTA */}
-              <div className="mt-8 pt-6 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <a
-                    href={selectedProject.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-400 text-slate-950 text-xs font-semibold hover:bg-cyan-300 transition-colors shadow-lg"
-                  >
-                    <span>View Live Application</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                  <a
-                    href={selectedProject.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-semibold transition-colors border border-white/10"
-                  >
-                    <Github className="w-3.5 h-3.5" />
-                    <span>Source Code</span>
-                  </a>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedProject(null)}
-                  className="text-xs text-slate-400 hover:text-white transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
